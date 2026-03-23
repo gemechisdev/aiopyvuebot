@@ -6,12 +6,45 @@
 
 const tg = window.Telegram?.WebApp;
 
+/**
+ * Apply Telegram theme colours to the document CSS variables.
+ * The CSS already uses --tg-theme-* variables as fallbacks in style.css.
+ */
+function applyTheme() {
+  if (!tg) return;
+  const p = tg.themeParams ?? {};
+  const root = document.documentElement;
+  const map = {
+    "--tg-theme-bg-color": p.bg_color,
+    "--tg-theme-secondary-bg-color": p.secondary_bg_color,
+    "--tg-theme-text-color": p.text_color,
+    "--tg-theme-hint-color": p.hint_color,
+    "--tg-theme-link-color": p.link_color,
+    "--tg-theme-button-color": p.button_color,
+    "--tg-theme-button-text-color": p.button_text_color,
+    "--tg-theme-header-bg-color": p.header_bg_color,
+    "--tg-theme-accent-text-color": p.accent_text_color,
+    "--tg-theme-section-bg-color": p.section_bg_color,
+    "--tg-theme-section-header-text-color": p.section_header_text_color,
+    "--tg-theme-subtitle-text-color": p.subtitle_text_color,
+    "--tg-theme-destructive-text-color": p.destructive_text_color,
+  };
+  for (const [cssVar, value] of Object.entries(map)) {
+    if (value) root.style.setProperty(cssVar, value);
+  }
+  // Keep the document body in sync with the Telegram background colour
+  if (p.bg_color) document.body.style.backgroundColor = p.bg_color;
+}
+
 export default {
   /** Call this once on app mount to signal readiness to Telegram. */
   init() {
     if (tg) {
       tg.ready();
       tg.expand();
+      applyTheme();
+      // Re-apply theme whenever Telegram changes it (e.g. user switches mode)
+      tg.onEvent("themeChanged", applyTheme);
     }
   },
 
@@ -61,6 +94,14 @@ export default {
     return tg?.themeParams ?? {};
   },
 
+  /**
+   * "light" | "dark" — matches Telegram's current colour scheme.
+   * Falls back to "light" when outside Telegram.
+   */
+  get colorScheme() {
+    return tg?.colorScheme ?? "light";
+  },
+
   /** True when running inside Telegram. */
   get isInTelegram() {
     return Boolean(tg?.initData);
@@ -104,6 +145,15 @@ export default {
   },
 
   openLink(url) {
-    tg ? tg.openTelegramLink(url) : window.open(url, "_blank");
+    if (!tg) {
+      window.open(url, "_blank");
+      return;
+    }
+    // t.me links must use openTelegramLink; all other URLs use openLink
+    if (url.startsWith("https://t.me/") || url.startsWith("tg://")) {
+      tg.openTelegramLink(url);
+    } else {
+      tg.openLink(url);
+    }
   },
 };

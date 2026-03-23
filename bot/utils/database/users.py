@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from bot.core.mongo import db
+from bot.core import mongo as _mongo
 
 
 async def upsert_user(
@@ -15,9 +15,9 @@ async def upsert_user(
     username: str | None = None,
 ) -> None:
     """Insert a new user or refresh their profile fields."""
-    if db is None:
+    if _mongo.db is None:
         return
-    await db.users.update_one(
+    await _mongo.db.users.update_one(
         {"_id": user_id},
         {
             "$set": {
@@ -33,12 +33,12 @@ async def upsert_user(
 
 
 async def get_user(user_id: int) -> dict[str, Any] | None:
-    if db is None:
+    if _mongo.db is None:
         return None
-    return await db.users.find_one({"_id": user_id})
+    return await _mongo.db.users.find_one({"_id": user_id})
 
 
 async def count_total_users() -> int:
-    if db is None:
+    if _mongo.db is None:
         return 0
-    return await db.users.count_documents({})
+    return await _mongo.db.users.count_documents({})
