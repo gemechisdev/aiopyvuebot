@@ -1,0 +1,14 @@
+{
+  "name": "whispierbot",
+  "template": "telegram_bot",
+  "description": "A Telegram bot for sending secret whisper messages",
+  "version": "1.0.0",
+  "created_at": "2025-06-09T08:24:28Z",
+  "config": {
+    "type": "telegram_bot",
+    "platform": "vercel",
+    "database": "supabase",
+    "framework": "fastapi",
+    "frontend": "vue"
+  }
+}
