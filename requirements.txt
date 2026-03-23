@@ -1,5 +1,15 @@
+# Web framework
 fastapi
-python-telegram-bot
-supabase
+uvicorn[standard]
+
+# Telegram bot (async, modern)
+aiogram>=3.7.0
+
+# MongoDB async driver
+motor>=3.3.0
+
+# Environment variables
 python-dotenv
-uvicorn
+
+# YAML for string localization
+pyyaml

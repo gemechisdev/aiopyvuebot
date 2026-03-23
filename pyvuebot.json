@@ -1,14 +1,15 @@
 {
-  "name": "whispierbot",
-  "template": "telegram_bot",
-  "description": "A Telegram bot for sending secret whisper messages",
-  "version": "1.0.0",
-  "created_at": "2025-06-09T08:24:28Z",
+  "name": "notebot-starterkit",
+  "template": "notebot",
+  "description": "Production-ready StarterKit for Telegram Mini Apps – aiogram + MongoDB + Vue 3",
+  "version": "2.0.0",
+  "created_at": "2026-03-23T09:43:12Z",
   "config": {
-    "type": "telegram_bot",
+    "type": "telegram_miniapp_starterkit",
     "platform": "vercel",
-    "database": "supabase",
-    "framework": "fastapi",
-    "frontend": "vue"
+    "database": "mongodb",
+    "bot_framework": "aiogram",
+    "frontend": "vue3",
+    "architecture": "plugin_based"
   }
 }

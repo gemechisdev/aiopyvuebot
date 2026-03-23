@@ -1,14 +1,16 @@
 """
-NoteBot – entry point for local development (polling mode).
+NoteBot StarterKit – entry point for local development (polling mode).
 
 Run with:
     python main.py
+or
+    python -m bot
 """
 
 import asyncio
 import logging
 
-from NoteBot.__main__ import main
+from bot.__main__ import main
 
 if __name__ == "__main__":
     try:

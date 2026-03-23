@@ -1,41 +1,99 @@
+"""
+NoteBot StarterKit – FastAPI application.
+
+This single file is the Vercel serverless entry point.
+It:
+  1. Bootstraps MongoDB + plugin routers (once per process via a flag)
+  2. Exposes Telegram webhook at  POST /api/telegram/webhook
+  3. Exposes REST endpoints for the Mini App at   /api/notes/*
+  4. Provides auto-register webhook on startup when WEBHOOK_URL is set
+  5. Serves Swagger docs at /api/docs
+
+Vercel rewrite rule in vercel.json routes:
+  /api/*  →  api/index.py  (Python serverless function)
+  /*      →  dist/         (Vite-built Mini App)
+"""
+
+from __future__ import annotations
+
 import logging
-from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.openapi.utils import get_openapi
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
 
-from .routes import telegram
+from bot.utils.logger import setup_logging
 
-# Setup logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
+# ── lazy-init guard (Vercel can reuse the same process across requests) ────────
+_initialized = False
 
-def custom_openapi():
+
+async def _ensure_initialized() -> None:
+    global _initialized
+    if _initialized:
+        return
+
+    from bot.core.mongo import connect_to_mongo
+    from bot.core.bot import dp
+    from bot import load_all_plugins
+
+    await connect_to_mongo()
+    load_all_plugins(dp)
+
+    # Auto-register webhook when running in production
+    from config import WEBHOOK_URL, WEBHOOK_PATH, BOT_TOKEN
+    if WEBHOOK_URL and BOT_TOKEN:
+        try:
+            from bot.core.bot import bot
+            full_url = WEBHOOK_URL.rstrip("/") + WEBHOOK_PATH
+            await bot.set_webhook(url=full_url)
+            logger.info("Webhook registered: %s", full_url)
+        except Exception as exc:
+            logger.warning("Could not auto-register webhook: %s", exc)
+
+    _initialized = True
+
+
+# ── FastAPI app ────────────────────────────────────────────────────────────────
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await _ensure_initialized()
+    yield
+
+
+def _custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="WhispierBot API",
-        version="1.0.0",
-        description="API for WhispierBot - Send secret whisper messages",
+    schema = get_openapi(
+        title="NoteBot StarterKit API",
+        version="2.0.0",
+        description=(
+            "REST API for the NoteBot Telegram Mini App.\n\n"
+            "**Authentication**: All `/api/notes` endpoints require\n"
+            "`Authorization: Telegram <url-encoded initData>` header."
+        ),
         routes=app.routes,
     )
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+    app.openapi_schema = schema
+    return schema
 
 
-# Initialize FastAPI
 app = FastAPI(
+    lifespan=lifespan,
     openapi_url="/api/openapi.json",
     docs_url=None,
     redoc_url=None,
 )
 
-# Add CORS middleware
+app.openapi = _custom_openapi  # type: ignore[method-assign]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,33 +102,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.openapi = custom_openapi
+# ── routers ────────────────────────────────────────────────────────────────────
 
-# Include routers
-app.include_router(telegram.router)
+from api.routes import telegram as tg_routes  # noqa: E402
+from api.routes import notes as notes_routes  # noqa: E402
+
+app.include_router(tg_routes.router)
+app.include_router(notes_routes.router)
+
+
+# ── utility endpoints ──────────────────────────────────────────────────────────
 
 
 @app.get("/api/docs", include_in_schema=False)
-async def get_swagger_documentation():
+async def swagger_ui():
     return get_swagger_ui_html(
         openapi_url="/api/openapi.json",
-        title="WhispierBot API Documentation",
-        swagger_favicon_url="/favicon.ico"
+        title="NoteBot API Docs",
     )
 
 
-@app.get("/api/health")
-async def health_check():
-    """Health check endpoint."""
-    from .db import supabase
-
-    bot_status = "configured" if telegram.TOKEN else "not configured"
-    db_status = "connected" if supabase else "not connected"
-
+@app.get("/api/health", tags=["health"])
+async def health_check() -> dict:
+    from config import BOT_TOKEN, MONGO_URI
     return {
-        "status": "healthy",
-        "bot": "whispierbot",
-        "bot_status": bot_status,
-        "database_status": db_status,
-        "message": "WhispierBot API is running!"
+        "status": "ok",
+        "bot_configured": bool(BOT_TOKEN),
+        "db_configured": bool(MONGO_URI),
+        "message": "NoteBot StarterKit is running 🚀",
     }

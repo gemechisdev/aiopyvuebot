@@ -1,0 +1,49 @@
+# NoteBot StarterKit – English strings
+# All values are HTML-formatted (parse_mode=HTML is the default).
+
+start: |
+  📒 <b>Welcome to NoteBot, {name}!</b>
+
+  Your personal note-taking assistant inside Telegram.
+  Save ideas, reminders, and anything else — then search and share them instantly.
+
+  <b>Quick start:</b>
+  • /addnote — save a note
+  • /notes   — browse your notes
+  • /search  — find a note
+  • /help    — full command list
+
+  Or open the <b>Note Manager Mini App</b> below 👇
+
+help: |
+  📖 <b>NoteBot Commands</b>
+
+  <b>Notes:</b>
+  /addnote <i>Title | Content</i>  — save a new note
+  /notes                           — list all your notes
+  /note <i>&lt;id&gt;</i>          — view a note
+  /delnote <i>&lt;id&gt;</i>       — delete a note
+  /search <i>&lt;query&gt;</i>     — full-text search
+
+  <b>Inline mode:</b>
+  Type <code>@YourBot</code> in any chat to search and share notes.
+
+  <b>Example:</b>
+  <code>/addnote Shopping | Milk, eggs, bread</code>
+
+about: |
+  ℹ️ <b>About NoteBot StarterKit</b>
+
+  A production-ready starter kit for building Telegram Mini Apps.
+
+  <b>Tech stack:</b>
+  ⚡ <b>Bot</b>      — aiogram 3 (async, plugin-based)
+  🌐 <b>API</b>      — FastAPI + Vercel serverless
+  💾 <b>Database</b> — MongoDB (Motor async driver)
+  🎨 <b>Frontend</b> — Vue 3 + Tailwind CSS v4
+  🔗 <b>Mini App</b> — Telegram WebApp SDK
+
+  Messages expire after 7 days for security (configurable).
+
+  <b>Developer:</b> @venopyx
+  <b>License:</b> MIT — fork and build anything!
