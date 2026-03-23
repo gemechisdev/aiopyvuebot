@@ -1,184 +1,264 @@
-# 🔒 WhispierBot
+# 📒 NoteBot StarterKit
 
-A modern Telegram bot for sending secret whisper messages that only specific people can read, even in public groups!
+> A **production-ready StarterKit** for building Telegram bots and Mini Apps.
+> Fork it, rename it, swap the domain logic — everything else is already wired up.
 
-![WhispierBot](https://img.shields.io/badge/WhispierBot-1.0.0-purple?style=for-the-badge&logo=telegram)
-
-## ✨ Features
-
-- 🔐 **Secret Messages**: Send whispers that only specific users can read
-- 👥 **Group Compatible**: Works in any chat or group, even if the bot isn't there
-- 🚀 **Fast & Reliable**: Built on modern serverless architecture
-- ⏰ **Auto-Expires**: Messages automatically expire after 7 days for security
-- 🆓 **Free**: Completely free to use
-- 🛡️ **Secure**: Messages are securely stored and encrypted
-
-## 🚀 How to Use
-
-1. **Start the bot**: Send `/start` to [@whispierbot](https://t.me/whispierbot)
-2. **Create a whisper**: Type `@whispierbot` in any chat
-3. **Write your message**: Add your secret message
-4. **Add recipient**: End with the recipient's @username or ID
-5. **Send**: Only the recipient can open and read the message!
-
-### Example
-```
-@whispierbot This is a secret message @username
-```
-
-## 🏗️ Tech Stack
-
-- **Backend**: FastAPI with Python
-- **Database**: Supabase PostgreSQL
-- **Frontend**: Vue.js 3 with Tailwind CSS v4
-- **Deployment**: Vercel Serverless Functions
-- **Bot API**: python-telegram-bot library
-- **Architecture**: PyVueBot framework
-
-## 🔧 Development Setup
-
-### Prerequisites
-- Python 3.9+
-- Node.js 18+
-- Supabase account
-- Telegram Bot Token
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/venopyx/whispierbot.git
-cd whispierbot
-```
-
-2. **Set up environment variables**
-```bash
-cp .env.example .env
-# Edit .env with your actual values
-```
-
-3. **Install Python dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Install Node.js dependencies**
-```bash
-npm install
-```
-
-5. **Set up Supabase database**
-   - Create a new Supabase project
-   - Run the SQL commands from `api/db.py` in the SQL editor
-   - Get your project URL and anon key
-
-6. **Configure Telegram bot**
-   - Create a bot with [@BotFather](https://t.me/BotFather)
-   - Enable inline mode in bot settings
-   - Set inline feedback to 100%
-   - Get your bot token
-
-### Local Development
-
-1. **Start the frontend**
-```bash
-npm run dev
-```
-
-2. **Start the backend** (in another terminal)
-```bash
-uvicorn api.index:app --reload --port 8000
-```
-
-3. **Set up webhook** (for testing)
-```bash
-curl -X GET "http://localhost:8000/api/telegram/setup-webhook?webhook_url=https://your-ngrok-url.com/api/telegram/webhook"
-```
-
-## 🚀 Deployment
-
-### Deploy to Vercel
-
-1. **Connect your repository to Vercel**
-2. **Add environment variables in Vercel dashboard**
-3. **Deploy**: Vercel will automatically build and deploy
-4. **Set webhook**: Visit `https://your-app.vercel.app/api/telegram/setup-webhook?webhook_url=https://your-app.vercel.app/api/telegram/webhook`
-
-### Environment Variables
-
-Required environment variables:
-
-```env
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_supabase_anon_key
-ADMIN_USER_ID=your_telegram_user_id  # Optional
-NODE_ENV=production
-```
-
-## 📊 Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-  id BIGINT PRIMARY KEY,
-  target_user JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Whispers Table
-```sql
-CREATE TABLE whispers (
-  inline_message_id VARCHAR PRIMARY KEY,
-  message TEXT NOT NULL,
-  sender_id BIGINT REFERENCES users(id),
-  recipient_ids BIGINT[] NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days')
-);
-```
-
-## 🛠️ API Endpoints
-
-- `POST /api/telegram/webhook` - Handle Telegram updates
-- `GET /api/telegram/setup-webhook` - Set up webhook URL
-- `GET /api/health` - Health check endpoint
-- `GET /api/docs` - API documentation
-
-## 📝 Commands
-
-- `/start` - Welcome message and instructions
-- `/help` - How to use the bot
-- `/stats` - Statistics (admin only)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Developer
-
-Built with ❤️ by [@venopyx](https://t.me/venopyx)
-
-**Framework**: [PyVueBot](https://github.com/venopyx/pyvuebot) - Modern CLI tool for Telegram Mini Apps
-
-## 🔗 Links
-
-- **Bot**: [@whispierbot](https://t.me/whispierbot)
-- **Developer**: [@venopyx](https://t.me/venopyx)
-- **Framework**: [PyVueBot](https://github.com/venopyx/pyvuebot)
+![Version](https://img.shields.io/badge/version-2.0.0-purple?style=flat-square)
+![aiogram](https://img.shields.io/badge/aiogram-3.x-blue?style=flat-square)
+![MongoDB](https://img.shields.io/badge/MongoDB-Motor-green?style=flat-square)
+![Vue](https://img.shields.io/badge/Vue-3-brightgreen?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-latest-teal?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)
 
 ---
 
-⭐ **Star this repository if you find it useful!**
+## ✨ What You Get
+
+| Layer | Tech | Purpose |
+|-------|------|---------|
+| **Bot** | aiogram 3 (async) | Telegram bot commands + inline mode |
+| **API** | FastAPI + Vercel | Webhook receiver + REST API for Mini App |
+| **Database** | MongoDB (Motor async) | Notes + user storage |
+| **Frontend** | Vue 3 + Tailwind CSS v4 | Telegram Mini App (WebApp) |
+| **Auth** | Telegram initData HMAC | Secure Mini App ↔ API communication |
+| **Deploy** | Vercel (serverless) | Zero-config production hosting |
+
+---
+
+## 🏗️ Project Structure
+
+```
+.
+├── config.py                    # Central config – reads from .env
+├── main.py                      # Entry point for local polling mode
+├── sample.env                   # Copy → .env, fill in values
+├── requirements.txt             # Python dependencies
+├── package.json                 # Node.js / Vite dependencies
+├── vercel.json                  # Vercel serverless + SPA routing
+├── pyvuebot.json                # Project metadata
+│
+├── bot/                         # 🤖 Bot package (plugin-based)
+│   ├── __init__.py              #    load_all_plugins(dp)
+│   ├── __main__.py              #    python -m bot  (polling)
+│   ├── core/
+│   │   ├── bot.py               #    aiogram Bot + Dispatcher singleton
+│   │   └── mongo.py             #    Motor client + index creation
+│   ├── plugins/
+│   │   ├── bot/
+│   │   │   ├── start.py         #    /start  (opens Mini App WebApp button)
+│   │   │   ├── help.py          #    /help
+│   │   │   └── inline.py        #    @bot <search> inline mode
+│   │   ├── notes/
+│   │   │   ├── add.py           #    /addnote
+│   │   │   ├── list.py          #    /notes
+│   │   │   ├── view.py          #    /note <id>  + pin callback
+│   │   │   ├── delete.py        #    /delnote <id>
+│   │   │   └── search.py        #    /search <query>
+│   │   └── sudo/
+│   │       └── stats.py         #    /stats  (admin only)
+│   └── utils/
+│       ├── logger.py            #    Structured logging
+│       ├── formatters.py        #    HTML message formatters
+│       ├── database/
+│       │   ├── users.py         #    User CRUD (MongoDB)
+│       │   └── notes.py         #    Notes CRUD (MongoDB)
+│       └── decorators/
+│           └── admins.py        #    @admin_only decorator
+│
+├── api/                         # 🌐 FastAPI app (Vercel entry point)
+│   ├── index.py                 #    App factory + lifespan
+│   ├── middleware/
+│   │   └── auth.py              #    Telegram initData validation
+│   └── routes/
+│       ├── telegram.py          #    POST /api/telegram/webhook
+│       └── notes.py             #    REST /api/notes/*
+│
+├── src/                         # 🎨 Vue 3 Telegram Mini App
+│   ├── App.vue                  #    Root: note list + search + modals
+│   ├── main.js
+│   ├── style.css                #    Tailwind v4 + CSS vars + dark theme
+│   ├── services/
+│   │   ├── telegramService.js   #    WebApp SDK wrapper
+│   │   └── apiService.js        #    Authenticated fetch helpers
+│   ├── store/
+│   │   └── notes.js             #    Vue composable (useNoteStore)
+│   └── components/
+│       ├── UserInfo.vue         #    Avatar + name + note count
+│       ├── NoteList.vue         #    List of NoteCards
+│       ├── NoteCard.vue         #    Single note (preview, pin, delete)
+│       └── NoteForm.vue         #    Bottom-sheet "New Note" form
+│
+└── strings/                     # 🌍 i18n string files
+    ├── helpers.py               #    load_strings / get_string
+    └── langs/
+        └── en.yml               #    English bot messages
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1 – Clone & configure
+
+```bash
+git clone https://github.com/gemechisdev/aiopyvuebot.git my-bot
+cd my-bot
+cp sample.env .env
+# Edit .env with your values (see Environment Variables below)
+```
+
+### 2 – Install dependencies
+
+```bash
+pip install -r requirements.txt   # Python backend + bot
+npm install                        # Vue.js frontend
+```
+
+### 3 – Run locally (polling mode)
+
+```bash
+# Terminal 1 – bot (polling)
+python main.py
+
+# Terminal 2 – API server (for Mini App development)
+uvicorn api.index:app --reload --port 8000
+
+# Terminal 3 – Vite dev server (hot reload)
+npm run dev
+```
+
+> The Vite dev server proxies `/api/*` to `http://localhost:8000` automatically (see `vite.config.js`).
+
+---
+
+## 🔐 Environment Variables
+
+Copy `sample.env` → `.env` and fill in:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BOT_TOKEN` | ✅ | Telegram bot token from @BotFather |
+| `MONGO_URI` | ✅ | MongoDB connection string (Atlas or self-hosted) |
+| `MONGO_DB_NAME` | ❌ | Database name (default: `notebot`) |
+| `WEB_APP_URL` | ✅ (prod) | Full URL of deployed Mini App for WebApp button |
+| `VITE_TELEGRAM_BOT_LINK` | ✅ (prod) | `https://t.me/YourBotUsername` |
+| `ADMIN_IDS` | ❌ | Comma-separated Telegram user IDs for `/stats` |
+| `WEBHOOK_URL` | ❌ (prod) | App base URL – auto-registers webhook on startup |
+
+---
+
+## 📱 Mini App Authentication
+
+Every `/api/notes/*` endpoint requires a valid `Authorization` header:
+
+```
+Authorization: Telegram <url-encoded Telegram initData>
+```
+
+The `telegramService.js` adds this header automatically via `window.Telegram.WebApp.initData`.  
+The backend verifies the HMAC-SHA256 signature using your `BOT_TOKEN` (see `api/middleware/auth.py`).
+
+---
+
+## 🤖 Bot Commands
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Welcome message + Open Mini App button |
+| `/help` | Full command reference |
+| `/addnote Title \| Content` | Save a new note |
+| `/notes` | List all your notes |
+| `/note <id>` | View a note in full |
+| `/delnote <id>` | Delete a note |
+| `/search <query>` | Full-text search |
+| `/stats` | Bot stats (admin only) |
+| `@bot <query>` | Search & share notes inline |
+
+---
+
+## 🌐 REST API
+
+All endpoints require `Authorization: Telegram <initData>`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/notes/` | List notes (`?limit`, `?skip`, `?q`) |
+| `POST` | `/api/notes/` | Create note |
+| `GET` | `/api/notes/{id}` | Get single note |
+| `PUT` | `/api/notes/{id}` | Update note |
+| `DELETE` | `/api/notes/{id}` | Delete note |
+| `POST` | `/api/notes/{id}/pin` | Toggle pin |
+| `POST` | `/api/telegram/webhook` | Telegram webhook receiver |
+| `GET` | `/api/telegram/setup-webhook` | Register webhook |
+| `GET` | `/api/telegram/webhook-info` | Current webhook status |
+| `GET` | `/api/health` | Health check |
+| `GET` | `/api/docs` | Swagger UI |
+
+---
+
+## 🚢 Deploy to Vercel
+
+```bash
+# 1. Push to GitHub and connect repo to Vercel
+# 2. Add all environment variables in Vercel dashboard
+# 3. Deploy (Vercel builds the Vue frontend and runs api/index.py as serverless function)
+# 4. Register the webhook:
+curl "https://your-app.vercel.app/api/telegram/setup-webhook?webhook_url=https://your-app.vercel.app"
+```
+
+---
+
+## ➕ Adding a Plugin
+
+Create a new file in `bot/plugins/<category>/my_feature.py`:
+
+```python
+from aiogram import Router
+from aiogram.filters import Command
+from aiogram.types import Message
+
+router = Router()
+
+@router.message(Command("mycommand"))
+async def cmd_mycommand(message: Message) -> None:
+    await message.reply("Hello from my plugin!")
+```
+
+Register it in `bot/__init__.py`:
+
+```python
+from bot.plugins.<category>.my_feature import router as my_router
+routers = [..., my_router]
+```
+
+That's it — the router is automatically included in the Dispatcher.
+
+---
+
+## 📦 Tech Stack Versions
+
+```
+aiogram>=3.7.0
+motor>=3.3.0
+fastapi
+uvicorn[standard]
+pyyaml
+python-dotenv
+
+vue@^3.5
+vite@^6
+@tailwindcss/vite@^4
+```
+
+---
+
+## 📄 License
+
+MIT — fork it, build on it, ship it.
+
+---
+
+## 👨‍💻 Author
+
+Built with ❤️ by [@venopyx](https://t.me/venopyx)  
+Framework: [PyVueBot](https://github.com/venopyx/pyvuebot) – CLI tool for Telegram Mini Apps

@@ -1,8 +1,8 @@
 {
-  "name": "whispierbot",
-  "description": "A Telegram bot for sending secret whisper messages",
+  "name": "notebot-starterkit",
+  "description": "StarterKit for Telegram Mini Apps – aiogram + MongoDB + Vue 3",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
