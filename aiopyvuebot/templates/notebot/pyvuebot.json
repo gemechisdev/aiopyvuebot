@@ -1,0 +1,14 @@
+{
+  "name": "{{ project_name }}",
+  "template": "notebot",
+  "description": "{{ project_description }}",
+  "version": "0.1.0",
+  "created_at": "{{ creation_date }}",
+  "config": {
+    "type": "telegram_miniapp",
+    "platform": "vercel",
+    "database": "mongodb",
+    "bot_framework": "aiogram",
+    "frontend": "vue3"
+  }
+}
