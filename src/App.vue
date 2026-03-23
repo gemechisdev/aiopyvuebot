@@ -62,6 +62,7 @@
       <NoteList
         v-else
         :notes="store.notes"
+        :load-failed="store.loadFailed"
         @view="openNote"
         @pin="togglePin"
         @delete="confirmDelete"
@@ -86,7 +87,7 @@
               class="text-lg font-bold flex-1"
               :style="{ color: tg?.themeParams?.text_color || 'var(--color-text)' }"
             >
-              {{ activeNote.is_pinned ? '📌' : '��' }} {{ activeNote.title }}
+              {{ activeNote.is_pinned ? '📌' : '📄' }} {{ activeNote.title }}
             </h2>
             <button class="text-xl" @click="activeNote = null">✕</button>
           </div>
@@ -107,7 +108,7 @@
               :style="{ borderColor:'var(--color-border)', color: tg?.themeParams?.text_color || 'var(--color-text)' }"
               @click="togglePin(activeNote.id)"
             >
-              {{ activeNote.is_pinned ? 'Unpin ��' : 'Pin 🔖' }}
+              {{ activeNote.is_pinned ? 'Unpin 📌' : 'Pin 🔖' }}
             </button>
             <button
               class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
@@ -122,7 +123,7 @@
     <!-- Note form modal -->
     <NoteForm
       :visible="showForm"
-      :is-saving="store.isLoading"
+      :is-saving="store.isSaving"
       @close="showForm = false"
       @save="saveNote"
     />
@@ -139,7 +140,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import telegramService from './services/telegramService.js'
 import { useNoteStore } from './store/notes.js'
 import UserInfo from './components/UserInfo.vue'
@@ -148,6 +149,9 @@ import NoteForm from './components/NoteForm.vue'
 
 const tg = window.Telegram?.WebApp
 const user = ref(telegramService.getUserData())
+
+// useNoteStore() now returns a reactive() object internally, so nested refs
+// are auto-unwrapped in templates and `store.isLoading` evaluates correctly.
 const store = useNoteStore()
 
 const searchQuery = ref('')
@@ -191,27 +195,31 @@ async function confirmDelete(id) {
 
 // ── lifecycle ──────────────────────────────────────────────────────────────
 onMounted(() => {
+  // init() calls tg.ready(), tg.expand(), applies theme colours, and registers
+  // the themeChanged listener — must be the first call so Telegram dismisses
+  // its own loading overlay immediately.
   telegramService.init()
+
+  // Initialise dark mode after init() so Telegram's colour scheme is settled,
+  // then keep it in sync via the themeChanged event.
+  isDark.value = telegramService.colorScheme === 'dark'
+  if (tg) {
+    tg.onEvent('themeChanged', () => {
+      isDark.value = tg.colorScheme === 'dark'
+    })
+  }
+
   store.loadNotes()
 
-  // Telegram Back Button
+  // Telegram Back Button — navigate back to the bot chat
   if (telegramService.isInTelegram) {
     const BOT_LINK = import.meta.env.VITE_TELEGRAM_BOT_LINK
     if (BOT_LINK) {
-      telegramService.showMainButton('Back to Bot', () => {
+      telegramService.showBackButton(() => {
         telegramService.openLink(BOT_LINK)
         telegramService.close()
       })
     }
-  }
-
-  // Dark theme detection
-  if (tg?.themeParams?.bg_color) {
-    const hex = tg.themeParams.bg_color.replace('#', '')
-    const r = parseInt(hex.slice(0, 2), 16)
-    const g = parseInt(hex.slice(2, 4), 16)
-    const b = parseInt(hex.slice(4, 6), 16)
-    isDark.value = (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5
   }
 })
 </script>
